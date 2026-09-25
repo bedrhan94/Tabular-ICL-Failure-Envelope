@@ -1,0 +1,8 @@
+reference_set,min_icl_minus_best_gbdt
+"published (xgboost, catboost)",0.014393939393939376
+"(xgboost, hist_gbdt)",0.007196969696969702
+"(catboost, hist_gbdt)",0.015340909090909086
+all three boosted,0.015340909090909072
+catboost only,0.014583333333333323
+xgboost only,0.0049242424242424004
+hist_gbdt only,0.005303030303030309
