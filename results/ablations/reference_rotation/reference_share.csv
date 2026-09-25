@@ -1,0 +1,8 @@
+reference_set,ref_is_catboost,ref_is_xgboost,ref_is_hist_gbdt
+"published (xgboost, catboost)",0.7576,0.2424,
+"(xgboost, hist_gbdt)",,0.4318,0.5682
+"(catboost, hist_gbdt)",0.7424,,0.2576
+all three boosted,0.6515,0.1288,0.2197
+catboost only,1.0,,
+xgboost only,,1.0,
+hist_gbdt only,,,1.0

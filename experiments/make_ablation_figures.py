@@ -155,6 +155,15 @@ def collect_margins(root: Path) -> pd.DataFrame:
         idx = d.set_index("model")
         icl = [m for m in ICL if m in idx.index]
         gbdt = [m for m in GBDT if m in idx.index]
+        # Each basis must carry exactly one TabPFN arm. The local weights and the
+        # quota-limited client cover different cell counts, so a basis holding both
+        # would silently let the thinner arm supply min-ICL -- the single-family
+        # scoring hazard of section 8, in the figure layer this time.
+        if {"tabpfn", "tabpfn_client"} <= set(icl):
+            raise SystemExit(
+                f"[ablation-fig] {key} carries both tabpfn and tabpfn_client; "
+                "min-ICL would be ambiguous. Drop one before plotting."
+            )
         rec = {"basis": label}
         for col in VARIANT:
             if col in idx and icl and gbdt:
@@ -168,7 +177,11 @@ def collect_margins(root: Path) -> pd.DataFrame:
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--ablations", type=Path, default=_ROOT / "results" / "ablations")
-    p.add_argument("--basis", default="external_multiseed", help="basis for panels A/B")
+    # Panels A and B default to the three-seed primary benchmark: it is the basis the
+    # paper's headline and its refutation both sit on, and the caption quotes its
+    # numbers. The 12-dataset subset was the old default and produced a figure whose
+    # panels disagreed with its own caption.
+    p.add_argument("--basis", default="external_primary_3seed", help="basis for panels A/B")
     p.add_argument("--out", type=Path, default=None)
     args = p.parse_args(argv)
 
@@ -187,8 +200,11 @@ def main(argv: list[str] | None = None) -> int:
     panel_variants(axes[1], s)
     panel_margin(axes[2], margins)
     label = dict(BASES)[args.basis] if args.basis in dict(BASES) else args.basis
+    # The framing is the reference policy, not calibration: section 6.1 counts which
+    # trigger fires and finds the relative criterion carries 95% of the zero-shift
+    # failures against 5% for the absolute calibration bar.
     fig.suptitle(
-        "AURE conflates out-of-the-box calibration with shift tolerance"
+        "The reference policy, not the calibration bar, decides the envelope"
         f"   (panels A-B: {label.replace(chr(10), ', ')})",
         fontsize=12.5, color=INK, x=0.006, ha="left", y=0.975,
     )
